@@ -3,71 +3,335 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dan's Streaming Chatbot</title>
+    <title>BA Copilot - AI Assistant for Business Analysts</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --primary-hover: #1d4ed8;
+            --secondary-color: #1e293b;
+            --accent-color: #3b82f6;
+            --background-color: #f8fafc;
+            --message-user-bg: #eff6ff;
+            --message-ai-bg: #f0f9ff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --scrollbar-track: #f1f5f9;
+            --scrollbar-thumb: #cbd5e1;
+            --scrollbar-thumb-hover: #94a3b8;
+            --header-gradient: linear-gradient(135deg, #1e40af 0%, #2563eb 100%);
+        }
+
+        body {
+            background-color: var(--background-color);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header-container {
+            width: 100%;
+            background: var(--header-gradient);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-content {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+
+        .header-icon {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.5rem;
+            border-radius: 0.75rem;
+            transition: all 0.2s ease;
+        }
+
+        .header-icon:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+
+        .main-content {
+            flex: 1;
+            width: 90%;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-container {
+            flex: 1;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+            margin-bottom: 1rem;
+        }
+
+        .chat-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-container::-webkit-scrollbar-track {
+            background: var(--scrollbar-track);
+            border-radius: 3px;
+        }
+
+        .chat-container::-webkit-scrollbar-thumb {
+            background-color: var(--scrollbar-thumb);
+            border-radius: 3px;
+            border: 2px solid var(--scrollbar-track);
+        }
+
+        .chat-container::-webkit-scrollbar-thumb:hover {
+            background-color: var(--scrollbar-thumb-hover);
+        }
+
+        /* Hide scrollbar when not needed */
+        .chat-container:not(:hover)::-webkit-scrollbar-thumb {
+            background-color: transparent;
+        }
+
+        .chat-container:not(:hover)::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        /* Show scrollbar on hover or when scrolling */
+        .chat-container:hover::-webkit-scrollbar-thumb,
+        .chat-container:focus-within::-webkit-scrollbar-thumb {
+            background-color: var(--scrollbar-thumb);
+        }
+
+        .chat-container:hover::-webkit-scrollbar-track,
+        .chat-container:focus-within::-webkit-scrollbar-track {
+            background: var(--scrollbar-track);
+        }
+
+        .message-input {
+            min-height: 60px;
+            max-height: 200px;
+            resize: vertical;
+            background-color: white;
+            border: 1px solid #e2e8f0;
+            transition: all 0.2s ease;
+        }
+
+        .message-input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .message {
+            max-width: 85%;
+            word-wrap: break-word;
+        }
+
+        .user-message {
+            background-color: var(--message-user-bg);
+            border-radius: 15px 15px 0 15px;
+            border: 1px solid rgba(59, 130, 246, 0.1);
+        }
+
+        .ai-message {
+            background-color: var(--background-color);
+            border-radius: 15px 15px 15px 0;
+            border: 1px solid rgba(37, 99, 235, 0.1);
+        }
+
+        .typing-indicator {
+            display: none;
+            padding: 12px 16px;
+            background-color: var(--background-color);
+            border-radius: 15px 15px 15px 0;
+            width: fit-content;
+            margin: 10px 0;
+            border: 1px solid rgba(37, 99, 235, 0.1);
+        }
+
+        .typing-indicator span {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            background-color: var(--primary-color);
+            border-radius: 50%;
+            margin: 0 2px;
+            animation: typing 1s infinite;
+        }
+
+        .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typing {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        .send-button {
+            background-color: var(--primary-color);
+            transition: all 0.2s ease;
+        }
+
+        .send-button:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        .send-button:active {
+            transform: translateY(0);
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                width: 98%;
+                padding: 0.5rem;
+            }
+            
+            .message {
+                max-width: 95%;
+            }
+        }
+    </style>
 </head>
-<body class="bg-gray-100 h-screen flex flex-col">
-<div class="flex-1 overflow-y-auto p-4">
-    <div id="chat-messages" class="space-y-4"></div>
-</div>
-<div class="p-4 bg-white">
-    <form id="chat-form">
-        <div class="flex space-x-4">
-            <input type="text" id="message-input" class="flex-1 border rounded p-2" placeholder="Type your message...">
-            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Send</button>
+<body>
+    <header class="header-container sticky top-0 z-10">
+        <div class="header-content container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <div class="header-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                            <path d="M12 8v4"/>
+                            <path d="M8 12h8"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold text-white">BA Copilot</h1>
+                        <p class="text-sm text-blue-100">AI Assistant for Business Analysts</p>
+                    </div>
+                </div>
+                <div class="hidden md:flex items-center space-x-4">
+                    <div class="flex items-center space-x-2 text-blue-100">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd" />
+                        </svg>
+                        <span class="text-sm">Powered by Spring AI</span>
+                    </div>
+                </div>
+            </div>
         </div>
-    </form>
-</div>
-<script>
-    const chatMessages = document.getElementById('chat-messages');
-    const chatForm = document.getElementById('chat-form');
-    const messageInput = document.getElementById('message-input');
+    </header>
 
-    chatForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const message = messageInput.value;
-        messageInput.value = '';
+    <main class="main-content">
+        <div class="chat-container">
+            <div id="chat-messages" class="space-y-4"></div>
+            <div id="typing-indicator" class="typing-indicator">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
 
-        // Add user message to chat
-        chatMessages.innerHTML += `<div class="bg-blue-100 p-2 rounded"><strong>You:</strong> ${message}</div>`;
+        <form id="chat-form" class="flex flex-col space-y-2">
+            <div class="flex space-x-4">
+                <textarea 
+                    id="message-input" 
+                    class="message-input flex-1 rounded-lg p-3"
+                    placeholder="Type your message here... (Shift + Enter for new line)"
+                    rows="1"
+                ></textarea>
+                <button 
+                    type="submit" 
+                    class="send-button text-white px-6 py-3 rounded-lg flex items-center justify-center"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+                    </svg>
+                </button>
+            </div>
+        </form>
+    </main>
 
-        // Add AI message container
-        const aiMessageContainer = document.createElement('div');
-        aiMessageContainer.className = 'bg-green-100 p-2 rounded';
-        aiMessageContainer.innerHTML = '<strong>AI:</strong> ';
-        const aiMessageContent = document.createElement('span');
-        aiMessageContainer.appendChild(aiMessageContent);
-        chatMessages.appendChild(aiMessageContainer);
+    <script>
+        const chatMessages = document.getElementById('chat-messages');
+        const chatForm = document.getElementById('chat-form');
+        const messageInput = document.getElementById('message-input');
+        const typingIndicator = document.getElementById('typing-indicator');
 
-        try {
-            const response = await fetchStreamWithRetry(`/stream?message=${encodeURIComponent(message)}`);
-            const reader = response.body.getReader();
-            const decoder = new TextDecoder();
+        // Auto-resize textarea
+        messageInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+        });
 
-            while (true) {
-                const { value, done } = await reader.read();
-                if (done) break;
-                const decodedChunk = decoder.decode(value, { stream: true });
-                aiMessageContent.textContent += decodedChunk;
+        // Handle Enter key (Shift+Enter for new line)
+        messageInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                chatForm.dispatchEvent(new Event('submit'));
             }
-        } catch (error) {
-            console.error('Error:', error);
-            aiMessageContent.textContent += 'Error occurred while fetching the response.';
-        }
+        });
 
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-    });
+        chatForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const message = messageInput.value.trim();
+            if (!message) return;
 
-    async function fetchStreamWithRetry(url, retries = 3) {
-        for (let i = 0; i < retries; i++) {
+            messageInput.value = '';
+            messageInput.style.height = 'auto';
+
+            // Add user message to chat
+            const userMessageDiv = document.createElement('div');
+            userMessageDiv.className = 'message user-message p-4 ml-auto';
+            userMessageDiv.innerHTML = `<strong class="text-blue-600">You:</strong><br>${message.replace(/\n/g, '<br>')}`;
+            chatMessages.appendChild(userMessageDiv);
+
+            // Add AI message container
+            const aiMessageContainer = document.createElement('div');
+            aiMessageContainer.className = 'message ai-message p-4';
+            aiMessageContainer.innerHTML = '<strong class="text-blue-600">AI:</strong><br>';
+            const aiMessageContent = document.createElement('span');
+            aiMessageContainer.appendChild(aiMessageContent);
+            chatMessages.appendChild(aiMessageContainer);
+
+            // Show typing indicator
+            typingIndicator.style.display = 'block';
+
             try {
-                const response = await fetch(url);
-                if (response.ok) return response;
+                const response = await fetchStreamWithRetry(`/stream?message=${encodeURIComponent(message)}`);
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+
+                while (true) {
+                    const { value, done } = await reader.read();
+                    if (done) break;
+                    const decodedChunk = decoder.decode(value, { stream: true });
+                    aiMessageContent.innerHTML += decodedChunk.replace(/\n/g, '<br>');
+                }
             } catch (error) {
-                if (i === retries - 1) throw error;
+                console.error('Error:', error);
+                aiMessageContent.innerHTML += 'Error occurred while fetching the response.';
+            } finally {
+                // Hide typing indicator
+                typingIndicator.style.display = 'none';
+            }
+
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        });
+
+        async function fetchStreamWithRetry(url, retries = 3) {
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const response = await fetch(url);
+                    if (response.ok) return response;
+                } catch (error) {
+                    if (i === retries - 1) throw error;
+                }
             }
         }
-    }
-</script>
+    </script>
 </body>
 </html>
