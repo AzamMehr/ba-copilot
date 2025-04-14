@@ -64,6 +64,14 @@
             flex-direction: column;
         }
 
+        .welcome-text {
+            background-color: #dbeafe;
+            color: #1e3a8a;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
         .chat-container {
             flex: 1;
             overflow-y: auto;
@@ -150,6 +158,12 @@
             width: fit-content;
             margin: 10px 0;
             border: 1px solid rgba(37, 99, 235, 0.1);
+            align-items: center;
+        }
+
+        .typing-indicator div {
+            display: flex;
+            align-items: center;
         }
 
         .typing-indicator span {
@@ -189,7 +203,7 @@
                 width: 98%;
                 padding: 0.5rem;
             }
-            
+
             .message {
                 max-width: 95%;
             }
@@ -197,141 +211,165 @@
     </style>
 </head>
 <body>
-    <header class="header-container sticky top-0 z-10">
-        <div class="header-content container mx-auto px-4 py-4">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center space-x-4">
-                    <div class="header-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                            <path d="M12 8v4"/>
-                            <path d="M8 12h8"/>
-                        </svg>
-                    </div>
-                    <div>
-                        <h1 class="text-2xl font-bold text-white">BA Copilot</h1>
-                        <p class="text-sm text-blue-100">AI Assistant for Business Analysts</p>
-                    </div>
-                </div>
-                <div class="hidden md:flex items-center space-x-4">
-                    <div class="flex items-center space-x-2 text-blue-100">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd" />
-                        </svg>
-                        <span class="text-sm">Powered by Spring AI</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </header>
-
-    <main class="main-content">
-        <div class="chat-container">
-            <div id="chat-messages" class="space-y-4"></div>
-            <div id="typing-indicator" class="typing-indicator">
-                <span></span>
-                <span></span>
-                <span></span>
-            </div>
-        </div>
-
-        <form id="chat-form" class="flex flex-col space-y-2">
-            <div class="flex space-x-4">
-                <textarea 
-                    id="message-input" 
-                    class="message-input flex-1 rounded-lg p-3"
-                    placeholder="Type your message here... (Shift + Enter for new line)"
-                    rows="1"
-                ></textarea>
-                <button 
-                    type="submit" 
-                    class="send-button text-white px-6 py-3 rounded-lg flex items-center justify-center"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                        <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+<header class="header-container sticky top-0 z-10">
+    <div class="header-content container mx-auto px-4 py-4">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+                <div class="header-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                        <path d="M12 8v4"/>
+                        <path d="M8 12h8"/>
                     </svg>
-                </button>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold text-white">BA Copilot</h1>
+                    <p class="text-sm text-blue-100">AI Assistant for Business Analysts</p>
+                </div>
             </div>
-        </form>
-    </main>
+            <div class="hidden md:flex items-center space-x-4">
+                <div class="flex items-center space-x-2 text-blue-100">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd" />
+                    </svg>
+                    <span class="text-sm">Powered by Spring AI</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
 
-    <script>
-        const chatMessages = document.getElementById('chat-messages');
-        const chatForm = document.getElementById('chat-form');
-        const messageInput = document.getElementById('message-input');
-        const typingIndicator = document.getElementById('typing-indicator');
+<main class="main-content">
+    <!-- Welcome Message Section -->
+    <div class="welcome-text">
+        <h2 class="text-xl font-bold mb-2">Welcome to BA Copilot</h2>
+        <p class="mb-2">BA Copilot is your virtual assistant designed for Business Analysts. It can help you with several key JIRA-related tasks:</p>
+        <ul class="list-disc ml-6 mb-2">
+            <li>Create JIRA tickets. After you describe your idea for a new app or feature, BA Copilot can create either a single ticket or generate multiple tickets depending on the level of detail you provide. Make sure the JIRA project already exists and that you provide its project key.</li>
+            <li>Extract up to last 10 tickets for a specific project using the provided project key.</li>
+            <li>Modify an existing ticket. Requires ticket key.</li>
+            <li>Add a comment to the ticket. Requires ticket key.</li>
+        </ul>
+        <p>Start by typing your command below!</p>
+    </div>
+    <!-- Chat Container -->
+    <div class="chat-container">
+        <div id="chat-messages" class="space-y-4"></div>
+        <div id="typing-indicator" class="typing-indicator">
+            <!-- Initially empty -->
+        </div>
+    </div>
 
-        // Auto-resize textarea
-        messageInput.addEventListener('input', function() {
-            this.style.height = 'auto';
-            this.style.height = (this.scrollHeight) + 'px';
-        });
+    <form id="chat-form" class="flex flex-col space-y-2">
+        <div class="flex space-x-4">
+                <textarea
+                        id="message-input"
+                        class="message-input flex-1 rounded-lg p-3"
+                        placeholder="Type your message here... (Shift + Enter for new line)"
+                        rows="1"
+                ></textarea>
+            <button
+                    type="submit"
+                    class="send-button text-white px-6 py-3 rounded-lg flex items-center justify-center"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+                </svg>
+            </button>
+        </div>
+    </form>
+</main>
 
-        // Handle Enter key (Shift+Enter for new line)
-        messageInput.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                chatForm.dispatchEvent(new Event('submit'));
-            }
-        });
+<script>
+    const chatMessages = document.getElementById('chat-messages');
+    const chatForm = document.getElementById('chat-form');
+    const messageInput = document.getElementById('message-input');
+    const typingIndicator = document.getElementById('typing-indicator');
+    const chatContainer = document.querySelector('.chat-container');
 
-        chatForm.addEventListener('submit', async (e) => {
+    // Function to scroll to bottom
+    function scrollToBottom() {
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+
+    // Auto-resize textarea
+    messageInput.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = (this.scrollHeight) + 'px';
+    });
+
+    // Handle Enter key (Shift+Enter for new line)
+    messageInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
-            const message = messageInput.value.trim();
-            if (!message) return;
+            chatForm.dispatchEvent(new Event('submit'));
+        }
+    });
 
-            messageInput.value = '';
-            messageInput.style.height = 'auto';
+    chatForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const message = messageInput.value.trim();
+        if (!message) return;
 
-            // Add user message to chat
-            const userMessageDiv = document.createElement('div');
-            userMessageDiv.className = 'message user-message p-4 ml-auto';
-            userMessageDiv.innerHTML = `<strong class="text-blue-600">You:</strong><br>${message.replace(/\n/g, '<br>')}`;
-            chatMessages.appendChild(userMessageDiv);
+        messageInput.value = '';
+        messageInput.style.height = 'auto';
 
-            // Add AI message container
-            const aiMessageContainer = document.createElement('div');
-            aiMessageContainer.className = 'message ai-message p-4';
-            aiMessageContainer.innerHTML = '<strong class="text-blue-600">AI:</strong><br>';
-            const aiMessageContent = document.createElement('span');
-            aiMessageContainer.appendChild(aiMessageContent);
-            chatMessages.appendChild(aiMessageContainer);
+        // Add user message to chat
+        const userMessageDiv = document.createElement('div');
+        userMessageDiv.className = 'message user-message p-4 ml-auto';
+        userMessageDiv.innerHTML = `<strong class="text-blue-600">You:</strong><br>${message.replace(/\n/g, '<br>')}`;
+        chatMessages.appendChild(userMessageDiv);
+        scrollToBottom();
 
-            // Show typing indicator
-            typingIndicator.style.display = 'block';
+        // Add AI message container
+        const aiMessageContainer = document.createElement('div');
+        aiMessageContainer.className = 'message ai-message p-4';
+        aiMessageContainer.innerHTML = '<strong class="text-blue-600">AI:</strong><br>';
+        const aiMessageContent = document.createElement('span');
+        aiMessageContainer.appendChild(aiMessageContent);
+        chatMessages.appendChild(aiMessageContainer);
+        scrollToBottom();
 
-            try {
-                const response = await fetchStreamWithRetry(`/stream?message=${encodeURIComponent(message)}`);
-                const reader = response.body.getReader();
-                const decoder = new TextDecoder();
+        // Show processing message and loading indicator
+        typingIndicator.style.display = 'flex';
+        typingIndicator.innerHTML = '<div class="mr-2 font-semibold">Processing your request...</div><span></span><span></span><span></span>';
+        scrollToBottom();
 
-                while (true) {
-                    const { value, done } = await reader.read();
-                    if (done) break;
-                    const decodedChunk = decoder.decode(value, { stream: true });
-                    aiMessageContent.innerHTML += decodedChunk.replace(/\n/g, '<br>');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                aiMessageContent.innerHTML += 'Error occurred while fetching the response.';
-            } finally {
-                // Hide typing indicator
-                typingIndicator.style.display = 'none';
+        try {
+            const response = await fetchStreamWithRetry(`/stream?message=${encodeURIComponent(message)}`);
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+
+            while (true) {
+                const { value, done } = await reader.read();
+                if (done) break;
+                const decodedChunk = decoder.decode(value, { stream: true });
+                aiMessageContent.innerHTML += decodedChunk.replace(/\n/g, '<br>');
+                scrollToBottom();
             }
+        } catch (error) {
+            console.error('Error:', error);
+            aiMessageContent.innerHTML += 'Error occurred while fetching the response.';
+            scrollToBottom();
+        } finally {
+            typingIndicator.style.display = 'none';
+            scrollToBottom();
+        }
+    });
 
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        });
-
-        async function fetchStreamWithRetry(url, retries = 3) {
-            for (let i = 0; i < retries; i++) {
-                try {
-                    const response = await fetch(url);
-                    if (response.ok) return response;
-                } catch (error) {
-                    if (i === retries - 1) throw error;
-                }
+    async function fetchStreamWithRetry(url, retries = 3) {
+        for (let i = 0; i < retries; i++) {
+            try {
+                const response = await fetch(url);
+                if (response.ok) return response;
+            } catch (error) {
+                if (i === retries - 1) throw error;
             }
         }
-    </script>
+    }
+
+    // Initial scroll to bottom
+    scrollToBottom();
+</script>
 </body>
 </html>
