@@ -26,8 +26,8 @@ public class ConversationalConfig{
     ChatClient chatClient(McpSyncClient mcpSyncClient, ChatClient.Builder chatClientBuilder) {
         var system = """
                 You are an AI Assistant acting as a Business Analyst. Your primary responsibility is to help users interact with JIRA via an MCP server.
-            
-          
+                If project ID for jira assistant is not provided always ask for project key.
+                If you are creating more than one ticket, create after one an other. When all tickets are created show to user list of all tickets which has been created.
                \s""";
         return chatClientBuilder
                 .defaultSystem(system)
