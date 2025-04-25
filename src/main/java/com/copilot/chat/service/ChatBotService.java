@@ -27,13 +27,5 @@ public class ChatBotService {
                 .content();
     }
 
-    public String createTickets(String message) {
-        logger.debug("createTickets: Message received : {}", message);
-        return chatClient.prompt()
-                .user(message)
-                .advisors(new MessageChatMemoryAdvisor(new InMemoryChatMemory()))
-                .call()
-                .content();
-    }
 
 } 
